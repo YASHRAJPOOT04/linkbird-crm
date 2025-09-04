@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LinkBird CRM
+
+LinkBird is a modern CRM application built with Next.js, Drizzle ORM, and NextAuth for authentication. This project was bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
@@ -29,8 +31,60 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment Guide
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Prerequisites
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. A GitHub account
+2. A Vercel account
+3. A PostgreSQL database (Neon, Supabase, Railway, etc.)
+4. Google OAuth credentials (for authentication)
+
+### Environment Variables
+
+Copy the `.env.example` file to `.env` and fill in the required values:
+
+```bash
+cp .env.example .env
+```
+
+Required environment variables:
+
+- `DATABASE_URL`: Your PostgreSQL connection string
+- `NEXTAUTH_SECRET`: A random string for NextAuth session encryption
+- `NEXTAUTH_URL`: Your application URL (http://localhost:3000 for development)
+- `GOOGLE_CLIENT_ID`: Your Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET`: Your Google OAuth client secret
+
+### Database Setup
+
+Generate database migrations:
+
+```bash
+npm run db:generate
+```
+
+Apply migrations to your database:
+
+```bash
+npm run db:migrate
+```
+
+### Deploy on Vercel
+
+1. Push your code to GitHub:
+
+```bash
+git push -u origin main
+```
+
+2. Import your repository in Vercel:
+   - Go to [Vercel](https://vercel.com/new)
+   - Connect to your GitHub repository
+   - Configure environment variables
+   - Use `npm run vercel-build` as the build command
+   - Deploy
+
+3. Your application will be available at the provided Vercel URL.
+
+For more details, check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
