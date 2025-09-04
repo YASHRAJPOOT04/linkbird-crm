@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { leads, campaigns } from '@/lib/db/schema';
+import { db } from '@/db';
+import { leads, campaigns } from '@/db/schema';
 import { eq, sql, count } from 'drizzle-orm';
 import { getSession } from '@/lib/auth';
 
@@ -13,48 +13,52 @@ export async function GET() {
 
     const userId = session.user.id;
 
-    // Get total leads count
+    // Get total leads count (through campaigns)
     const totalLeadsResult = await db
       .select({ count: count() })
       .from(leads)
-      .where(eq(leads.userId, userId));
+      .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(eq(campaigns.userId, userId));
 
     const totalLeads = totalLeadsResult[0]?.count || 0;
 
-    // Get new leads count
+    // Get new leads count (Pending status)
     const newLeadsResult = await db
       .select({ count: count() })
       .from(leads)
-      .where(eq(leads.userId, userId))
-      .where(eq(leads.status, 'New'));
+      .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(eq(campaigns.userId, userId))
+      .where(eq(leads.status, 'Pending'));
 
     const newLeads = newLeadsResult[0]?.count || 0;
 
-    // Get qualified leads count
-    const qualifiedLeadsResult = await db
+    // Get contacted leads count
+    const contactedLeadsResult = await db
       .select({ count: count() })
       .from(leads)
-      .where(eq(leads.userId, userId))
-      .where(eq(leads.status, 'Qualified'));
+      .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(eq(campaigns.userId, userId))
+      .where(eq(leads.status, 'Contacted'));
 
-    const qualifiedLeads = qualifiedLeadsResult[0]?.count || 0;
+    const contactedLeads = contactedLeadsResult[0]?.count || 0;
 
-    // Get won leads count for conversion rate
-    const wonLeadsResult = await db
+    // Get converted leads count for conversion rate
+    const convertedLeadsResult = await db
       .select({ count: count() })
       .from(leads)
-      .where(eq(leads.userId, userId))
-      .where(eq(leads.status, 'Won'));
+      .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(eq(campaigns.userId, userId))
+      .where(eq(leads.status, 'Converted'));
 
-    const wonLeads = wonLeadsResult[0]?.count || 0;
+    const convertedLeads = convertedLeadsResult[0]?.count || 0;
 
-    // Calculate conversion rate (won leads / total leads) * 100
-    const conversionRate = totalLeads > 0 ? Math.round((wonLeads / totalLeads) * 100) : 0;
+    // Calculate conversion rate (converted leads / total leads) * 100
+    const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
 
     return NextResponse.json({
       totalLeads,
       newLeads,
-      qualifiedLeads,
+      contactedLeads,
       conversionRate,
     });
   } catch (error) {
