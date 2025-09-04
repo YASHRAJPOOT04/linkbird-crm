@@ -3,6 +3,7 @@ import { users } from '@/db/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,11 +18,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, email),
-    });
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
 
-    if (existingUser) {
+    if (existingUser.length > 0) {
       return NextResponse.json(
         { message: 'User with this email already exists' },
         { status: 409 }

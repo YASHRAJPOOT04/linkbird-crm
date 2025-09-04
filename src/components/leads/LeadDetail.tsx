@@ -116,7 +116,7 @@ export function LeadDetail() {
                 <p className="text-xs text-muted-foreground">Status</p>
                 <LeadStatusSelector 
                   leadId={lead.id} 
-                  initialStatus={lead.status as any} 
+                  initialStatus={lead.status as 'Pending' | 'Contacted' | 'Responded' | 'Converted'} 
                   onStatusChange={() => fetchLeadDetails()}
                 />
               </div>

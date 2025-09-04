@@ -94,7 +94,7 @@ export function LeadStats() {
         <CardContent>
           <div className="text-2xl font-bold">{displayStats.newLeads}</div>
           <p className="text-xs text-muted-foreground">
-            Leads with "New" status
+            Leads with &quot;New&quot; status
           </p>
         </CardContent>
       </Card>
@@ -105,7 +105,7 @@ export function LeadStats() {
         <CardContent>
           <div className="text-2xl font-bold">{displayStats.qualifiedLeads}</div>
           <p className="text-xs text-muted-foreground">
-            Leads with "Qualified" status
+            Leads with &quot;Qualified&quot; status
           </p>
         </CardContent>
       </Card>

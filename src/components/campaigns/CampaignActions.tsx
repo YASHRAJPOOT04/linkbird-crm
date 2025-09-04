@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Edit, MoreHorizontal, Play, Pause, Trash } from 'lucide-react';
+import { EditCampaignForm } from './EditCampaignForm';
 import {
   DropdownMenu,
   DropdownMenuContent,

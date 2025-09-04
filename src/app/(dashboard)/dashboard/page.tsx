@@ -95,7 +95,7 @@ export default function DashboardPage() {
               Welcome back, {session.user.name}
             </h1>
             <p className="text-muted-foreground">
-              Here's an overview of your leads and campaigns
+              Here&apos;s an overview of your leads and campaigns
             </p>
           </div>
         )}

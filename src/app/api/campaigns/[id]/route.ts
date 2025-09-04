@@ -6,18 +6,20 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSession() as any;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const campaign = await db.query.campaigns.findFirst({
       where: and(
-        eq(campaigns.id, params.id),
+        eq(campaigns.id, id),
         eq(campaigns.userId, session.user.id)
       ),
       with: {
@@ -41,21 +43,22 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSession() as any;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const { name, status } = await request.json();
 
     // Verify campaign exists and belongs to user
     const existingCampaign = await db.query.campaigns.findFirst({
       where: and(
-        eq(campaigns.id, params.id),
+        eq(campaigns.id, id),
         eq(campaigns.userId, session.user.id)
       ),
     });
@@ -72,7 +75,7 @@ export async function PATCH(
         updatedAt: new Date(),
       })
       .where(
-        and(eq(campaigns.id, params.id), eq(campaigns.userId, session.user.id))
+        and(eq(campaigns.id, id), eq(campaigns.userId, session.user.id))
       )
       .returning();
 
@@ -88,19 +91,21 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSession() as any;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify campaign exists and belongs to user
     const existingCampaign = await db.query.campaigns.findFirst({
       where: and(
-        eq(campaigns.id, params.id),
+        eq(campaigns.id, id),
         eq(campaigns.userId, session.user.id)
       ),
     });
@@ -112,7 +117,7 @@ export async function DELETE(
     await db
       .delete(campaigns)
       .where(
-        and(eq(campaigns.id, params.id), eq(campaigns.userId, session.user.id))
+        and(eq(campaigns.id, id), eq(campaigns.userId, session.user.id))
       );
 
     return NextResponse.json({ success: true });

@@ -6,18 +6,20 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSession() as any;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const lead = await db.query.leads.findFirst({
       where: and(
-        eq(leads.id, params.id),
+        eq(leads.id, id),
         eq(leads.userId, session.user.id)
       ),
       with: {
@@ -41,21 +43,22 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSession() as any;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const { name, email, company, position, status, notes, campaignId } = await request.json();
 
     // Verify lead exists and belongs to user
     const existingLead = await db.query.leads.findFirst({
       where: and(
-        eq(leads.id, params.id),
+        eq(leads.id, id),
         eq(leads.userId, session.user.id)
       ),
     });
@@ -77,7 +80,7 @@ export async function PATCH(
         updatedAt: new Date(),
       })
       .where(
-        and(eq(leads.id, params.id), eq(leads.userId, session.user.id))
+        and(eq(leads.id, id), eq(leads.userId, session.user.id))
       )
       .returning();
 
@@ -93,19 +96,21 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession();
+    const session = await getSession() as any;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify lead exists and belongs to user
     const existingLead = await db.query.leads.findFirst({
       where: and(
-        eq(leads.id, params.id),
+        eq(leads.id, id),
         eq(leads.userId, session.user.id)
       ),
     });
@@ -117,7 +122,7 @@ export async function DELETE(
     await db
       .delete(leads)
       .where(
-        and(eq(leads.id, params.id), eq(leads.userId, session.user.id))
+        and(eq(leads.id, id), eq(leads.userId, session.user.id))
       );
 
     return NextResponse.json({ success: true });
