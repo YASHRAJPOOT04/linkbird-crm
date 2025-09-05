@@ -43,12 +43,6 @@ export default function LeadsPage() {
   // const router = useRouter(); // Not used
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const page = searchParams.get('page') || '1';
-    const campaignId = searchParams.get('campaignId');
-    fetchLeads(parseInt(page), campaignId);
-  }, [searchParams, fetchLeads]);
-
   const fetchLeads = useCallback(async (page: number, campaignId?: string | null) => {
     setIsLoading(true);
     setError('');
@@ -75,6 +69,12 @@ export default function LeadsPage() {
       setIsLoading(false);
     }
   }, [pagination.limit]);
+
+  useEffect(() => {
+    const page = searchParams.get('page') || '1';
+    const campaignId = searchParams.get('campaignId');
+    fetchLeads(parseInt(page), campaignId);
+  }, [searchParams, fetchLeads]);
 
   const handlePageChange = (page: number) => {
     fetchLeads(page);
