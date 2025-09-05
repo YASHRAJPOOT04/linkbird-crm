@@ -2,7 +2,7 @@
 
 import { useUIStore } from '@/lib/store/uiStore';
 import { cn } from '@/lib/utils';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -16,7 +16,6 @@ import {
   ChevronRight,
   LogOut,
 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
 
 const navItems = [
   {

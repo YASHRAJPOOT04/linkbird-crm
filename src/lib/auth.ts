@@ -4,18 +4,18 @@ import { users, accounts, sessions, verificationTokens } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
-import NextAuth from 'next-auth';
-import { getServerSession } from 'next-auth/next';
-import GoogleProvider from 'next-auth/providers/google';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import NextAuth, { type NextAuthConfig } from 'next-auth';
+import Google from 'next-auth/providers/google';
+import Credentials from 'next-auth/providers/credentials';
+import { getServerSession } from 'next-auth';
 
 export const authConfig = {
   providers: [
-    GoogleProvider({
+    Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     }),
-    CredentialsProvider({
+    Credentials({
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
@@ -27,14 +27,14 @@ export const authConfig = {
         }
 
         const user = await db.query.users.findFirst({
-          where: eq(users.email, credentials.email),
+          where: eq(users.email, credentials.email as string),
         });
 
         if (!user || !user.password) {
           return null;
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await bcrypt.compare(credentials.password as string, user.password);
 
         if (!isPasswordValid) {
           return null;
@@ -50,14 +50,12 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    // @ts-expect-error - NextAuth types are not fully compatible
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
       }
       return token;
     },
-    // @ts-expect-error - NextAuth types are not fully compatible
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
@@ -68,7 +66,6 @@ export const authConfig = {
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
-    // @ts-expect-error - Type mismatch with sessionToken field
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
@@ -76,22 +73,9 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
-};
+} satisfies NextAuthConfig;
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
 
-// Define session type
-type UserSession = {
-  user?: {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string;
-  };
-};
-
 // Helper function to get session on server side
-export const getSession = async (): Promise<UserSession | null> => {
-  const session = await getServerSession(authConfig) as UserSession | null;
-  return session;
-};
+export const getSession = () => getServerSession(authConfig);
