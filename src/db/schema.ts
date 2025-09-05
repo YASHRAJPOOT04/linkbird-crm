@@ -1,14 +1,12 @@
 import { relations } from 'drizzle-orm';
 import {
   pgTable,
-  serial,
   text,
   timestamp,
   uuid,
   varchar,
   pgEnum,
   integer,
-  boolean,
 } from 'drizzle-orm/pg-core';
 
 // Define enums for campaign and lead status

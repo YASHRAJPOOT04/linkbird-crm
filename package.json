@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node -r esbuild-register src/db/migrate.ts",
     "vercel-build": "npm run db:generate && npm run db:migrate && npm run build"
@@ -28,6 +28,7 @@
     "cmdk": "^1.1.1",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.5",
+    "esbuild-register": "^3.6.0",
     "lucide-react": "^0.542.0",
     "next": "15.5.2",
     "next-auth": "^4.24.11",

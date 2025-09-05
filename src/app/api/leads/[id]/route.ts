@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { leads } from '@/db/schema';
+import { leads, campaigns } from '@/db/schema';
 import { getSession } from '@/lib/auth';
 import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,16 +18,14 @@ export async function GET(
     const { id } = await params;
 
     const lead = await db.query.leads.findFirst({
-      where: and(
-        eq(leads.id, id),
-        eq(leads.userId, session.user.id)
-      ),
+      where: eq(leads.id, id),
       with: {
         campaign: true,
       },
     });
 
-    if (!lead) {
+    // Check if the lead belongs to the user through the campaign
+    if (!lead || lead.campaign.userId !== session.user.id) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
 
@@ -57,13 +55,13 @@ export async function PATCH(
 
     // Verify lead exists and belongs to user
     const existingLead = await db.query.leads.findFirst({
-      where: and(
-        eq(leads.id, id),
-        eq(leads.userId, session.user.id)
-      ),
+      where: eq(leads.id, id),
+      with: {
+        campaign: true,
+      },
     });
 
-    if (!existingLead) {
+    if (!existingLead || existingLead.campaign.userId !== session.user.id) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
 
@@ -79,9 +77,7 @@ export async function PATCH(
         ...(campaignId && { campaignId }),
         updatedAt: new Date(),
       })
-      .where(
-        and(eq(leads.id, id), eq(leads.userId, session.user.id))
-      )
+      .where(eq(leads.id, id))
       .returning();
 
     return NextResponse.json(updatedLead[0]);
@@ -109,21 +105,19 @@ export async function DELETE(
 
     // Verify lead exists and belongs to user
     const existingLead = await db.query.leads.findFirst({
-      where: and(
-        eq(leads.id, id),
-        eq(leads.userId, session.user.id)
-      ),
+      where: eq(leads.id, id),
+      with: {
+        campaign: true,
+      },
     });
 
-    if (!existingLead) {
+    if (!existingLead || existingLead.campaign.userId !== session.user.id) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
 
     await db
       .delete(leads)
-      .where(
-        and(eq(leads.id, id), eq(leads.userId, session.user.id))
-      );
+      .where(eq(leads.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {

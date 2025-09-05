@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useUIStore } from '@/lib/store/uiStore';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,7 +15,7 @@ type Lead = {
   email: string;
   company: string;
   position: string;
-  status: 'New' | 'Contacted' | 'Responded' | 'Converted' | 'Rejected';
+  status: 'Pending' | 'Contacted' | 'Responded' | 'Converted';
   notes: string;
   campaignId: string;
   campaign: {
@@ -28,7 +27,7 @@ type Lead = {
 };
 
 export function LeadDetail() {
-  const { selectedLeadId, isLeadDetailOpen, setIsLeadDetailOpen } = useUIStore();
+  const { selectedLeadId, isLeadDetailOpen, setLeadDetailOpen } = useUIStore();
   const [lead, setLead] = useState<Lead | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,9 +37,9 @@ export function LeadDetail() {
     if (selectedLeadId && isLeadDetailOpen) {
       fetchLeadDetails();
     }
-  }, [selectedLeadId, isLeadDetailOpen]);
+  }, [selectedLeadId, isLeadDetailOpen, fetchLeadDetails]);
 
-  const fetchLeadDetails = async () => {
+  const fetchLeadDetails = useCallback(async () => {
     if (!selectedLeadId) return;
     
     setIsLoading(true);
@@ -61,10 +60,10 @@ export function LeadDetail() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedLeadId]);
 
   const handleClose = () => {
-    setIsLeadDetailOpen(false);
+            setLeadDetailOpen(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -76,7 +75,7 @@ export function LeadDetail() {
   };
 
   return (
-    <Sheet open={isLeadDetailOpen} onOpenChange={setIsLeadDetailOpen}>
+    <Sheet open={isLeadDetailOpen} onOpenChange={setLeadDetailOpen}>
       <SheetContent className="sm:max-w-md">
         <SheetHeader className="flex flex-row items-center justify-between">
           <SheetTitle>Lead Details</SheetTitle>
@@ -167,21 +166,7 @@ export function LeadDetail() {
   );
 }
 
-function StatusBadge({ status }: { status: Lead['status'] }) {
-  const variants = {
-    New: 'secondary',
-    Contacted: 'default',
-    Responded: 'warning',
-    Converted: 'success',
-    Rejected: 'destructive',
-  } as const;
 
-  return (
-    <Badge variant={variants[status]} className="capitalize">
-      {status.toLowerCase()}
-    </Badge>
-  );
-}
 
 function LeadDetailSkeleton() {
   return (

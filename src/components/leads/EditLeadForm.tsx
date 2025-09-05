@@ -66,9 +66,9 @@ export function EditLeadForm({
       fetchLeadDetails();
       fetchCampaigns();
     }
-  }, [isOpen, leadId]);
+  }, [isOpen, leadId, fetchLeadDetails, fetchCampaigns]);
 
-  const fetchLeadDetails = async () => {
+  const fetchLeadDetails = useCallback(async () => {
     if (!leadId) return;
     
     setIsFetching(true);
@@ -98,9 +98,9 @@ export function EditLeadForm({
     } finally {
       setIsFetching(false);
     }
-  };
+  }, [leadId]);
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = useCallback(async () => {
     try {
       const response = await fetch('/api/campaigns');
       if (response.ok) {
@@ -110,7 +110,7 @@ export function EditLeadForm({
     } catch (error) {
       console.error('Error fetching campaigns:', error);
     }
-  };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

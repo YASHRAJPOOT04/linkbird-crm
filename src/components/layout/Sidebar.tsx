@@ -3,6 +3,7 @@
 import { useUIStore } from '@/lib/store/uiStore';
 import { cn } from '@/lib/utils';
 import { signOut } from 'next-auth/react';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -108,10 +109,12 @@ export function Sidebar() {
         >
           <div className="h-8 w-8 rounded-full bg-gray-200">
             {session?.user?.image ? (
-              <img
+              <Image
                 src={session.user.image}
                 alt={session.user.name || 'User'}
                 className="h-full w-full rounded-full object-cover"
+                width={32}
+                height={32}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-600">

@@ -6,17 +6,6 @@ import bcrypt from 'bcryptjs';
 
 import NextAuth, { getServerSession } from 'next-auth';
 import type { NextAuthConfig } from 'next-auth';
-
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-    };
-  }
-}
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 

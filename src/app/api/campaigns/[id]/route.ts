@@ -3,13 +3,14 @@ import { campaigns } from '@/db/schema';
 import { getSession } from '@/lib/auth';
 import { and, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+import { Session } from 'next-auth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession() as any;
+    const session = await getSession() as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -17,21 +18,20 @@ export async function GET(
 
     const { id } = await params;
 
-    const campaign = await db.query.campaigns.findFirst({
-      where: and(
+    const campaign = await db
+      .select()
+      .from(campaigns)
+      .where(and(
         eq(campaigns.id, id),
         eq(campaigns.userId, session.user.id)
-      ),
-      with: {
-        leads: true,
-      },
-    });
+      ))
+      .limit(1);
 
-    if (!campaign) {
+    if (!campaign[0]) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 
-    return NextResponse.json(campaign);
+    return NextResponse.json(campaign[0]);
   } catch (error) {
     console.error('Error fetching campaign:', error);
     return NextResponse.json(
@@ -46,7 +46,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession() as any;
+    const session = await getSession() as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -56,14 +56,16 @@ export async function PATCH(
     const { name, status } = await request.json();
 
     // Verify campaign exists and belongs to user
-    const existingCampaign = await db.query.campaigns.findFirst({
-      where: and(
+    const existingCampaign = await db
+      .select()
+      .from(campaigns)
+      .where(and(
         eq(campaigns.id, id),
         eq(campaigns.userId, session.user.id)
-      ),
-    });
+      ))
+      .limit(1);
 
-    if (!existingCampaign) {
+    if (!existingCampaign[0]) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 
@@ -94,7 +96,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession() as any;
+    const session = await getSession() as Session | null;
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -103,14 +105,16 @@ export async function DELETE(
     const { id } = await params;
 
     // Verify campaign exists and belongs to user
-    const existingCampaign = await db.query.campaigns.findFirst({
-      where: and(
+    const existingCampaign = await db
+      .select()
+      .from(campaigns)
+      .where(and(
         eq(campaigns.id, id),
         eq(campaigns.userId, session.user.id)
-      ),
-    });
+      ))
+      .limit(1);
 
-    if (!existingCampaign) {
+    if (!existingCampaign[0]) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 

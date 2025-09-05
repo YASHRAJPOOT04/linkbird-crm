@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { leads, campaigns } from '@/db/schema';
-import { eq, sql, count } from 'drizzle-orm';
+import { eq, sql, count, and } from 'drizzle-orm';
 import { getSession } from '@/lib/auth';
 
 export async function GET() {
@@ -27,8 +27,7 @@ export async function GET() {
       .select({ count: count() })
       .from(leads)
       .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
-      .where(eq(campaigns.userId, userId))
-      .where(eq(leads.status, 'Pending'));
+      .where(and(eq(campaigns.userId, userId), eq(leads.status, 'Pending')));
 
     const newLeads = newLeadsResult[0]?.count || 0;
 
@@ -37,8 +36,7 @@ export async function GET() {
       .select({ count: count() })
       .from(leads)
       .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
-      .where(eq(campaigns.userId, userId))
-      .where(eq(leads.status, 'Contacted'));
+      .where(and(eq(campaigns.userId, userId), eq(leads.status, 'Contacted')));
 
     const contactedLeads = contactedLeadsResult[0]?.count || 0;
 
@@ -47,8 +45,7 @@ export async function GET() {
       .select({ count: count() })
       .from(leads)
       .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
-      .where(eq(campaigns.userId, userId))
-      .where(eq(leads.status, 'Converted'));
+      .where(and(eq(campaigns.userId, userId), eq(leads.status, 'Converted')));
 
     const convertedLeads = convertedLeadsResult[0]?.count || 0;
 

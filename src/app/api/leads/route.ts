@@ -1,7 +1,7 @@
 import { db } from '@/db';
-import { leads } from '@/db/schema';
+import { leads, campaigns } from '@/db/schema';
 import { getSession } from '@/lib/auth';
-import { eq } from 'drizzle-orm';
+import { eq, desc, asc, and, count } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -27,56 +27,47 @@ export async function GET(request: NextRequest) {
     // Build query based on filters and sorting
     let orderByClause;
     if (sortField === 'name') {
-      orderByClause = (leads, { desc, asc }) => isDesc ? [desc(leads.name)] : [asc(leads.name)];
+      orderByClause = isDesc ? desc(leads.name) : asc(leads.name);
     } else if (sortField === 'status') {
-      orderByClause = (leads, { desc, asc }) => isDesc ? [desc(leads.status)] : [asc(leads.status)];
+      orderByClause = isDesc ? desc(leads.status) : asc(leads.status);
     } else {
       // Default to createdAt
-      orderByClause = (leads, { desc, asc }) => isDesc ? [desc(leads.createdAt)] : [asc(leads.createdAt)];
+      orderByClause = isDesc ? desc(leads.createdAt) : asc(leads.createdAt);
     }
 
-    // Build query based on filters
-    let query = db.query.leads.findMany({
-      where: eq(leads.userId, session.user.id),
-      with: {
-        campaign: true,
-      },
-      limit,
-      offset,
-      orderBy: orderByClause,
-    });
-
+    // Build query based on filters - get leads through campaigns
+    let whereCondition;
+    
     // Apply campaign filter if provided
     if (campaignId) {
-      query = db.query.leads.findMany({
-        where: (leads, { and, eq }) => 
-          and(eq(leads.userId, session.user.id), eq(leads.campaignId, campaignId)),
-        with: {
-          campaign: true,
-        },
-        limit,
-        offset,
-        orderBy: orderByClause,
-      });
+      whereCondition = and(eq(campaigns.userId, session.user.id), eq(leads.campaignId, campaignId));
+    } else {
+      whereCondition = eq(campaigns.userId, session.user.id);
     }
 
-    const userLeads = await query;
+    const userLeads = await db
+      .select()
+      .from(leads)
+      .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(whereCondition)
+      .orderBy(orderByClause)
+      .limit(limit)
+      .offset(offset);
 
     // Get total count for pagination
-    const countQuery = campaignId
-      ? db.select({ count: db.fn.count() }).from(leads)
-          .where(eq(leads.userId, session.user.id))
-          .where(eq(leads.campaignId, campaignId))
-      : db.select({ count: db.fn.count() }).from(leads)
-          .where(eq(leads.userId, session.user.id));
+    const countResult = await db
+      .select({ count: count() })
+      .from(leads)
+      .innerJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(whereCondition);
 
-    const [{ count }] = await countQuery;
-    const totalPages = Math.ceil(Number(count) / limit);
+    const totalCount = countResult[0]?.count || 0;
+    const totalPages = Math.ceil(Number(totalCount) / limit);
 
     return NextResponse.json({
       leads: userLeads,
       pagination: {
-        total: Number(count),
+        total: Number(totalCount),
         totalPages,
         currentPage: page,
         limit,
@@ -99,7 +90,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, email, company, position, campaignId, notes } = await request.json();
+    const { name, email, company, campaignId } = await request.json();
 
     if (!name || !email || !campaignId) {
       return NextResponse.json(
@@ -114,11 +105,8 @@ export async function POST(request: NextRequest) {
         name,
         email,
         company: company || '',
-        position: position || '',
-        status: 'New',
+        status: 'Pending',
         campaignId,
-        userId: session.user.id,
-        notes: notes || '',
         createdAt: new Date(),
         updatedAt: new Date(),
       })

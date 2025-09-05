@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation'; // Removed unused import
 
 export function RegisterForm() {
-  const router = useRouter();
+  // const router = useRouter(); // Removed unused import
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +43,7 @@ export function RegisterForm() {
         password,
         callbackUrl: '/dashboard',
       });
-    } catch (error) {
+    } catch {
       setError('Something went wrong. Please try again.');
       setIsLoading(false);
     }
@@ -53,7 +53,7 @@ export function RegisterForm() {
     setIsLoading(true);
     try {
       await signIn('google', { callbackUrl: '/dashboard' });
-    } catch (error) {
+    } catch {
       setError('Something went wrong with Google sign in.');
       setIsLoading(false);
     }

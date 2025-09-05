@@ -18,16 +18,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Negotiation' | 'Won' | 'Lost';
+type LeadStatus = 'Pending' | 'Contacted' | 'Responded' | 'Converted';
 
 const statuses: { value: LeadStatus; label: string }[] = [
-  { value: 'New', label: 'New' },
+  { value: 'Pending', label: 'Pending' },
   { value: 'Contacted', label: 'Contacted' },
-  { value: 'Qualified', label: 'Qualified' },
-  { value: 'Proposal', label: 'Proposal' },
-  { value: 'Negotiation', label: 'Negotiation' },
-  { value: 'Won', label: 'Won' },
-  { value: 'Lost', label: 'Lost' },
+  { value: 'Responded', label: 'Responded' },
+  { value: 'Converted', label: 'Converted' },
 ];
 
 interface LeadStatusSelectorProps {

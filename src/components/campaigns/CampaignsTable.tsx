@@ -89,9 +89,9 @@ export function CampaignsTable({ campaigns, isLoading }: CampaignsTableProps) {
 function StatusBadge({ status }: { status: Campaign['status'] }) {
   const variants = {
     Draft: 'secondary',
-    Active: 'success',
-    Paused: 'warning',
-    Completed: 'default',
+    Active: 'default',
+    Paused: 'outline',
+    Completed: 'secondary',
   } as const;
 
   return (

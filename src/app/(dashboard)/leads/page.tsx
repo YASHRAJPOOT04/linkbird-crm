@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { LeadsTable } from '@/components/leads/LeadsTable';
 import { LeadDetail } from '@/components/leads/LeadDetail';
 import { AddLeadForm } from '@/components/leads/AddLeadForm';
@@ -14,7 +13,7 @@ type Lead = {
   email: string;
   company: string;
   position: string;
-  status: 'New' | 'Contacted' | 'Responded' | 'Converted' | 'Rejected';
+  status: 'Pending' | 'Contacted' | 'Responded' | 'Converted';
   campaignId: string;
   campaign: {
     id: string;

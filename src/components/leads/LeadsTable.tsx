@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,8 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useUIStore } from '@/lib/store/uiStore';
-import { ChevronRight, Edit, Trash } from 'lucide-react';
-import { EditLeadForm } from './EditLeadForm';
+import { ChevronRight, Trash } from 'lucide-react';
 
 type Lead = {
   id: string;
@@ -23,7 +21,7 @@ type Lead = {
   email: string;
   company: string;
   position: string;
-  status: 'New' | 'Contacted' | 'Responded' | 'Converted' | 'Rejected';
+  status: 'Pending' | 'Contacted' | 'Responded' | 'Converted';
   campaignId: string;
   campaign: {
     id: string;
@@ -48,13 +46,11 @@ type LeadsTableProps = {
 
 export function LeadsTable({ leads, pagination, isLoading, onPageChange }: LeadsTableProps) {
   const router = useRouter();
-  const { setSelectedLeadId, setIsLeadDetailOpen } = useUIStore();
-  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
-  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const { setSelectedLeadId, setLeadDetailOpen } = useUIStore();
 
   const handleViewLead = (leadId: string) => {
     setSelectedLeadId(leadId);
-    setIsLeadDetailOpen(true);
+    setLeadDetailOpen(true);
   };
 
   if (isLoading) {
@@ -98,16 +94,6 @@ export function LeadsTable({ leads, pagination, isLoading, onPageChange }: Leads
               <TableCell>{lead.campaign.name}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                  <Button 
-                    size="icon" 
-                    variant="ghost"
-                    onClick={() => {
-                      setEditingLeadId(lead.id);
-                      setIsEditFormOpen(true);
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
                   <Button 
                     size="icon" 
                     variant="ghost"
@@ -191,11 +177,10 @@ export function LeadsTable({ leads, pagination, isLoading, onPageChange }: Leads
 
 function StatusBadge({ status }: { status: Lead['status'] }) {
   const variants = {
-    New: 'secondary',
+    Pending: 'secondary',
     Contacted: 'default',
-    Responded: 'warning',
-    Converted: 'success',
-    Rejected: 'destructive',
+    Responded: 'outline',
+    Converted: 'secondary',
   } as const;
 
   return (
@@ -253,17 +238,6 @@ function LeadsTableSkeleton() {
         </div>
       </div>
 
-      {editingLeadId && (
-        <EditLeadForm
-          leadId={editingLeadId}
-          isOpen={isEditFormOpen}
-          onOpenChange={setIsEditFormOpen}
-          onLeadUpdated={() => {
-            router.refresh();
-            setEditingLeadId(null);
-          }}
-        />
-      )}
     </div>
   );
 }

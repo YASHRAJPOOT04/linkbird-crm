@@ -17,10 +17,10 @@ type CampaignStatus = 'Draft' | 'Active' | 'Paused' | 'Completed';
 type CampaignActionsProps = {
   id: string;
   status: CampaignStatus;
-  onEdit?: () => void;
+  // onEdit?: () => void; // Removed unused prop
 };
 
-export function CampaignActions({ id, status, onEdit }: CampaignActionsProps) {
+export function CampaignActions({ id, status }: CampaignActionsProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);

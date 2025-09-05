@@ -34,7 +34,7 @@ export function LoginForm() {
 
       router.push('/dashboard');
       router.refresh();
-    } catch (error) {
+    } catch {
       setError('Something went wrong. Please try again.');
       setIsLoading(false);
     }
@@ -44,7 +44,7 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       await signIn('google', { callbackUrl: '/dashboard' });
-    } catch (error) {
+    } catch {
       setError('Something went wrong with Google sign in.');
       setIsLoading(false);
     }

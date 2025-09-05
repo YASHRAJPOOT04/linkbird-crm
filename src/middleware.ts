@@ -1,7 +1,6 @@
-import { getSession } from '@/lib/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export default async function middleware(request: NextRequest) {
+export default function middleware() {
   // Temporarily bypass authentication to fix the error
   return NextResponse.next();
   
