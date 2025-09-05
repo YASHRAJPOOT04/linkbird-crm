@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { LeadsTable } from '@/components/leads/LeadsTable';
 import { LeadDetail } from '@/components/leads/LeadDetail';
 import { AddLeadForm } from '@/components/leads/AddLeadForm';
@@ -40,16 +40,16 @@ export default function LeadsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const router = useRouter();
+  // const router = useRouter(); // Not used
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const page = searchParams.get('page') || '1';
     const campaignId = searchParams.get('campaignId');
     fetchLeads(parseInt(page), campaignId);
-  }, [searchParams]);
+  }, [searchParams, fetchLeads]);
 
-  const fetchLeads = async (page: number, campaignId?: string | null) => {
+  const fetchLeads = useCallback(async (page: number, campaignId?: string | null) => {
     setIsLoading(true);
     setError('');
     
@@ -74,7 +74,7 @@ export default function LeadsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [pagination.limit]);
 
   const handlePageChange = (page: number) => {
     fetchLeads(page);
