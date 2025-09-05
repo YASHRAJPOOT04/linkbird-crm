@@ -1,6 +1,6 @@
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
-import { migrate } from 'drizzle-orm/neon-serverless/migrator';
+import { migrate } from 'drizzle-orm/neon-http/migrator';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
@@ -26,7 +26,7 @@ async function main() {
   }
   
   const sql = neon(process.env.DATABASE_URL);
-  const db = drizzle(sql);
+  const db = drizzle(sql, { schema: {} });
   
   await migrate(db, { migrationsFolder });
   

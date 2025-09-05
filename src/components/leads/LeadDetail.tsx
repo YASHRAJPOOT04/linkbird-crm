@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -33,12 +33,6 @@ export function LeadDetail() {
   const [error, setError] = useState('');
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
 
-  useEffect(() => {
-    if (selectedLeadId && isLeadDetailOpen) {
-      fetchLeadDetails();
-    }
-  }, [selectedLeadId, isLeadDetailOpen, fetchLeadDetails]);
-
   const fetchLeadDetails = useCallback(async () => {
     if (!selectedLeadId) return;
     
@@ -61,6 +55,12 @@ export function LeadDetail() {
       setIsLoading(false);
     }
   }, [selectedLeadId]);
+
+  useEffect(() => {
+    if (selectedLeadId && isLeadDetailOpen) {
+      fetchLeadDetails();
+    }
+  }, [selectedLeadId, isLeadDetailOpen, fetchLeadDetails]);
 
   const handleClose = () => {
             setLeadDetailOpen(false);

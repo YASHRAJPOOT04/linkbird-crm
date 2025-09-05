@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,13 +61,6 @@ export function EditLeadForm({
   });
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isOpen && leadId) {
-      fetchLeadDetails();
-      fetchCampaigns();
-    }
-  }, [isOpen, leadId, fetchLeadDetails, fetchCampaigns]);
-
   const fetchLeadDetails = useCallback(async () => {
     if (!leadId) return;
     
@@ -111,6 +104,13 @@ export function EditLeadForm({
       console.error('Error fetching campaigns:', error);
     }
   }, []);
+
+  useEffect(() => {
+    if (isOpen && leadId) {
+      fetchLeadDetails();
+      fetchCampaigns();
+    }
+  }, [isOpen, leadId, fetchLeadDetails, fetchCampaigns]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

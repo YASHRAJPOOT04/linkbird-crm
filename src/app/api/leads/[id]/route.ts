@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { leads } from '@/db/schema';
+import { leads, campaigns } from '@/db/schema';
 import { getSession } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,15 +17,18 @@ export async function GET(
 
     const { id } = await params;
 
-    const lead = await db.query.leads.findFirst({
-      where: eq(leads.id, id),
-      with: {
-        campaign: true,
-      },
-    });
+    const lead = await db.select().from(leads)
+      .where(eq(leads.id, id))
+      .limit(1)
+      .leftJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .execute()
+      .then(res => res[0] ? {
+        ...res[0].leads,
+        campaign: res[0].campaigns
+      } : null);
 
     // Check if the lead belongs to the user through the campaign
-    if (!lead || lead.campaign.userId !== session.user.id) {
+    if (!lead || !lead.campaign || lead.campaign.userId !== session.user.id) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
 
@@ -54,14 +57,17 @@ export async function PATCH(
     const { name, email, company, position, status, notes, campaignId } = await request.json();
 
     // Verify lead exists and belongs to user
-    const existingLead = await db.query.leads.findFirst({
-      where: eq(leads.id, id),
-      with: {
-        campaign: true,
-      },
-    });
+    const existingLeadResult = await db.select()
+      .from(leads)
+      .leftJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(eq(leads.id, id));
 
-    if (!existingLead || existingLead.campaign.userId !== session.user.id) {
+    const existingLead = existingLeadResult.length > 0 ? {
+      ...existingLeadResult[0].leads,
+      campaign: existingLeadResult[0].campaigns
+    } : null;
+
+    if (!existingLead || !existingLead.campaign || existingLead.campaign.userId !== session.user.id) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
 
@@ -104,14 +110,17 @@ export async function DELETE(
     const { id } = await params;
 
     // Verify lead exists and belongs to user
-    const existingLead = await db.query.leads.findFirst({
-      where: eq(leads.id, id),
-      with: {
-        campaign: true,
-      },
-    });
+    const existingLeadResult = await db.select()
+      .from(leads)
+      .leftJoin(campaigns, eq(leads.campaignId, campaigns.id))
+      .where(eq(leads.id, id));
 
-    if (!existingLead || existingLead.campaign.userId !== session.user.id) {
+    const existingLead = existingLeadResult.length > 0 ? {
+      ...existingLeadResult[0].leads,
+      campaign: existingLeadResult[0].campaigns
+    } : null;
+
+    if (!existingLead || !existingLead.campaign || existingLead.campaign.userId !== session.user.id) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
 
